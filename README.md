@@ -14,17 +14,9 @@ The following command line flags are available for use in this script:
 
 ## Install
 
-### With Go
+You can find this packge on the [AUR](https://aur.archlinux.org/packages/crypto-tracker-git).
 
-Regular `GOBIN` folder (make sure it's in your `PATH`):
-`go install github.com/Nox04/crypto-tracker@latest`
-
-Install to custom location:
-`GOBIN=<custom location> go install github.com/Nox04/crypto-tracker@latest`
-
-f.e. `sudo GOBIN=/usr/bin/ go install github.com/Nox04/crypto-tracker@latest`
-
-### Waybar Example
+## Waybar Example
 
 This is how you'd use it as a custom module in [Waybar](https://github.com/Alexays/Waybar).
 
