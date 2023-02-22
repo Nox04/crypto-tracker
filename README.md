@@ -30,7 +30,7 @@ This is how you'd use it as a custom module in [Waybar](https://github.com/Alexa
 
 ```
 //config
-"custom/crypto-tracking": {
+"custom/cryptotracking": {
     "format": "{}",
     "return-type": "json",
     "exec": "crypto-tracker -k XXXXXXXXX -s BTC,ETH,DOGE -m BTC",
@@ -38,7 +38,7 @@ This is how you'd use it as a custom module in [Waybar](https://github.com/Alexa
 }
 
 //style
-#custom-crypto-tracking {
+#custom-cryptotracking {
   background: #98bb6c;
   color: #1f1f28;
   padding: 0 10px;
