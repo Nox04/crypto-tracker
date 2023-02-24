@@ -1,5 +1,7 @@
 # Cryptocurrency Price Tracker
 
+![Image](assets/screenshot.png)
+
 This is a simple script written in Go to retrieve the latest price for several cryptocurrencies using the CoinMarketCap API. The script takes in various command line flags, including the CoinMarketCap API key, the main symbol to display, and the symbols to track. The default symbols tracked are BTC, DOT, BNB, ETH, and FLOW.
 
 It emits a JSON object that you can use in your own scripts or in a status bar like Waybar.
