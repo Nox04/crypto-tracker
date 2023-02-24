@@ -1,5 +1,7 @@
 # Cryptocurrency Price Tracker
 
+[![AUR version](https://img.shields.io/aur/version/crypto-tracker?label=crypto-tracker&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/crypto-tracker/)
+
 ![Image](assets/screenshot.png)
 
 This is a simple script written in Go to retrieve the latest price for several cryptocurrencies using the CoinMarketCap API. The script takes in various command line flags, including the CoinMarketCap API key, the main symbol to display, and the symbols to track. The default symbols tracked are BTC, DOT, BNB, ETH, and FLOW.
@@ -16,7 +18,7 @@ The following command line flags are available for use in this script:
 
 ## Install
 
-You can find this packge on the [AUR](https://aur.archlinux.org/packages/crypto-tracker-git).
+You can find this packge on the [AUR](https://aur.archlinux.org/packages/crypto-tracker).
 
 ## Waybar Example
 
