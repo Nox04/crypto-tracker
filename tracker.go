@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -14,18 +16,18 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-const ENDPOINT = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
+const endpoint = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
 
-type Output struct {
+type output struct {
 	Text    string `json:"text"`
 	Tooltip string `json:"tooltip"`
 }
 
-func requestData(key string, symbols string) string {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", ENDPOINT, nil)
+func requestData(key string, symbols string) (string, error) {
+	client := http.Client{}
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		panic(err)
+		return "", errors.New("error creating request")
 	}
 
 	q := url.Values{}
@@ -37,18 +39,22 @@ func requestData(key string, symbols string) string {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return "", errors.New("error sending request")
 	}
-	respBody, _ := io.ReadAll(resp.Body)
 
-	return string(respBody)
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", errors.New("error reading response body")
+	}
+
+	return string(respBody), nil
 }
 
 func main() {
 
-	var mainSymbol string
-	var key string
-	var symbolsToTrack string
+	var mainSymbol, key, symbolsToTrack string
+
+	// Default values
 	symbols := "BTC,DOT,BNB,ETH,FLOW"
 	mainSymbolToShow := "BTC"
 
@@ -58,7 +64,7 @@ func main() {
 	pflag.Parse()
 
 	if key == "" {
-		panic("No key provided. Please use -k or --key to provide your coinmarketcap api key")
+		log.Fatalln("no key provided. Please use -k or --key to provide your coinmarketcap api key")
 	}
 
 	if symbolsToTrack != "" {
@@ -71,10 +77,12 @@ func main() {
 
 	symbolsArray := strings.Split(symbols, ",")
 	ac := accounting.Accounting{Symbol: "$", Precision: 2}
-	var rawData string = requestData(key, symbols)
+	rawData, err := requestData(key, symbols)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	var mainText string
-	var tooltipText string
+	var mainText, tooltipText string
 
 	for i, symbol := range symbolsArray {
 		price := gjson.Get(rawData, "data."+symbol+".0.quote.USD.price").Float()
@@ -94,11 +102,10 @@ func main() {
 		mainText = fmt.Sprintf("%s: %s", symbolsArray[0], ac.FormatMoney(price))
 	}
 
-	var output Output = Output{mainText, tooltipText}
-
-	result, err := json.Marshal(&output)
+	o := output{mainText, tooltipText}
+	result, err := json.Marshal(&o)
 	if err != nil {
-		panic(err)
+		log.Fatalln("error marshalling output")
 	}
 
 	fmt.Println(string(result))
