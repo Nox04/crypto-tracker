@@ -13,14 +13,32 @@ import (
 
 	"github.com/leekchan/accounting"
 	"github.com/spf13/pflag"
-	"github.com/tidwall/gjson"
 )
 
 const endpoint = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest"
 
-type output struct {
+// Output is the format of the output for waybar
+type Output struct {
 	Text    string `json:"text"`
 	Tooltip string `json:"tooltip"`
+}
+
+// Coin is the structure of the coins from coinmarketcap
+type Coin struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Symbol string `json:"symbol"`
+	Slug   string `json:"slug"`
+	Quote  struct {
+		USD struct {
+			Price float64 `json:"price"`
+		} `json:"USD"`
+	} `json:"quote"`
+}
+
+// RawCMCData is the raw data from coinmarketcap
+type RawCMCData struct {
+	Data map[string][]Coin `json:"data"`
 }
 
 func requestData(key string, symbols string) (string, error) {
@@ -82,27 +100,37 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	var cmcData RawCMCData
+
+	err = json.Unmarshal([]byte(rawData), &cmcData)
+	if err != nil {
+		log.Fatalln("error unmarshalling cmc data")
+	}
+
 	var mainText, tooltipText string
 
 	for i, symbol := range symbolsArray {
-		price := gjson.Get(rawData, "data."+symbol+".0.quote.USD.price").Float()
+		price := cmcData.Data[symbol][0].Quote.USD.Price
 		price = math.Ceil(price*100) / 100
+
 		if symbol == mainSymbolToShow {
 			mainText = fmt.Sprintf("%s: %s", mainSymbolToShow, ac.FormatMoney(price))
 		}
+
 		tooltipText += fmt.Sprintf("%s: %s", symbol, ac.FormatMoney(price))
 		if i != len(symbolsArray)-1 {
 			tooltipText += "\n"
 		}
 	}
 
+	// If main symbol is not in the list, show the first one
 	if mainText == "" {
-		price := gjson.Get(rawData, "data."+symbolsArray[0]+".0.quote.USD.price").Float()
+		price := cmcData.Data[symbolsArray[0]][0].Quote.USD.Price
 		price = math.Ceil(price*100) / 100
 		mainText = fmt.Sprintf("%s: %s", symbolsArray[0], ac.FormatMoney(price))
 	}
 
-	o := output{mainText, tooltipText}
+	o := Output{mainText, tooltipText}
 	result, err := json.Marshal(&o)
 	if err != nil {
 		log.Fatalln("error marshalling output")
